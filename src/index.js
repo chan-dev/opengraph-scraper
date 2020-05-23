@@ -33,8 +33,9 @@ function parseHTML(html) {
   return data;
 }
 
-app.get('/', async (req, res) => {
+app.get('/', async (req, res, next) => {
   try {
+    throw Error('error');
     const url =
       'https://www.freecodecamp.org/news/how-to-create-a-coronavirus-covid-19-dashboard-map-app-in-react-with-gatsby-and-leaflet';
     const html = await getHTML(url);
@@ -42,7 +43,14 @@ app.get('/', async (req, res) => {
     res.json(data);
   } catch (error) {
     console.log({ error });
+    next(error);
   }
+});
+
+app.use(function (err, req, res, next) {
+  res.status(res.statusCode || 500).json({
+    message: 'Server error',
+  });
 });
 
 const PORT = process.env.PORT || 4000;
