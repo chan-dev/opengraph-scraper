@@ -12,6 +12,7 @@ async function getHTML(url) {
 }
 
 function parseHTML(html) {
+  const $ = cheerio.load(html);
   // NOTE: we can't save cheerio elements inside variables or else
   // attributes attr() will return null
   const getMetatag = (prop) =>
@@ -21,13 +22,16 @@ function parseHTML(html) {
 
   const hasVideo = () => $('video').length;
 
-  const $ = cheerio.load(html);
+  // NOTE: we add a default empty string so properties will still have a value
+  // w/c is empty string ('') or else they won't be included when parsed as
+  // JSON strings because null values are ignored
   const data = {
-    description: getMetatag('description'),
-    image: getMetatag('image'),
-    title: getMetatag('title'),
-    author: getMetatag('author'),
-    type: getMetatag('type'),
+    description: getMetatag('description') || '',
+    image: getMetatag('image') || '',
+    title: getMetatag('title') || '',
+    author: getMetatag('author') || '',
+    type: getMetatag('type') || '',
+    url: getMetatag('url') || '',
     video: !!hasVideo(),
   };
   return data;
@@ -35,9 +39,7 @@ function parseHTML(html) {
 
 app.get('/', async (req, res, next) => {
   try {
-    throw Error('error');
-    const url =
-      'https://www.freecodecamp.org/news/how-to-create-a-coronavirus-covid-19-dashboard-map-app-in-react-with-gatsby-and-leaflet';
+    const url = 'https://twitter.com/home';
     const html = await getHTML(url);
     const data = parseHTML(html);
     res.json(data);
